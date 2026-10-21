@@ -1,0 +1,46 @@
+---
+- name: Install and configure containerd
+  hosts: kubernetes
+  become: true
+
+  tasks:
+
+    - name: Install containerd
+      dnf:
+        name: containerd
+        state: present
+
+    - name: Ensure containerd config directory exists
+      file:
+        path: /etc/containerd
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Generate default containerd configuration
+      shell: |
+        containerd config default > /etc/containerd/config.toml
+      args:
+        creates: /etc/containerd/config.toml
+
+    - name: Enable SystemdCgroup
+      replace:
+        path: /etc/containerd/config.toml
+        regexp: 'SystemdCgroup = false'
+        replace: 'SystemdCgroup = true'
+
+    - name: Enable and start containerd
+      systemd:
+        name: containerd
+        enabled: true
+        state: restarted
+
+    - name: Verify containerd is running
+      systemd:
+        name: containerd
+      register: containerd_status
+
+    - name: Display containerd status
+      debug:
+        msg: "Containerd state is {{ containerd_status.status.ActiveState }}"

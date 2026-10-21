@@ -5,17 +5,7 @@
 
   tasks:
 
-    - name: Disable swap immediately
-      command: swapoff -a
-      changed_when: false
-
-    - name: Disable swap permanently in fstab
-      replace:
-        path: /etc/fstab
-        regexp: '^(.*swap.*)$'
-        replace: '# \1'
-
-    - name: Configure kernel modules for Kubernetes
+    - name: Create modules-load configuration
       copy:
         dest: /etc/modules-load.d/k8s.conf
         content: |
@@ -25,17 +15,13 @@
         group: root
         mode: '0644'
 
-    - name: Load overlay module
-      community.general.modprobe:
-        name: overlay
-        state: present
+    - name: Load overlay kernel module
+      command: modprobe overlay
 
-    - name: Load br_netfilter module
-      community.general.modprobe:
-        name: br_netfilter
-        state: present
+    - name: Load br_netfilter kernel module
+      command: modprobe br_netfilter
 
-    - name: Configure Kubernetes sysctl settings
+    - name: Configure Kubernetes sysctl parameters
       copy:
         dest: /etc/sysctl.d/99-kubernetes.conf
         content: |
@@ -48,7 +34,6 @@
 
     - name: Apply sysctl settings
       command: sysctl --system
-      changed_when: false
 
     - name: Install useful packages
       dnf:
@@ -58,4 +43,5 @@
           - wget
           - bash-completion
           - git
+          - jq
         state: present
