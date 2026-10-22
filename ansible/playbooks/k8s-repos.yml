@@ -8,16 +8,14 @@
 
   tasks:
 
-    - name: Ensure DNF plugins are installed
+    - name: Install DNF plugins
       dnf:
         name: dnf-plugins-core
         state: present
 
-    - name: Add Kubernetes repository
+    - name: Configure Kubernetes repository
       copy:
         dest: /etc/yum.repos.d/kubernetes.repo
-        owner: root
-        group: root
         mode: '0644'
         content: |
           [kubernetes]
@@ -27,15 +25,12 @@
           gpgcheck=1
           gpgkey=https://pkgs.k8s.io/core:/stable:/{{ kubernetes_version }}/rpm/repodata/repomd.xml.key
 
+    - name: Add Docker repository
+      get_url:
+        url: https://download.docker.com/linux/rhel/docker-ce.repo
+        dest: /etc/yum.repos.d/docker-ce.repo
+        mode: '0644'
+
     - name: Refresh package metadata
       command: dnf makecache
       changed_when: false
-
-    - name: Verify kubeadm package availability
-      command: dnf list kubeadm
-      register: kubeadm_check
-      changed_when: false
-
-    - name: Display kubeadm availability
-      debug:
-        var: kubeadm_check.stdout_lines
