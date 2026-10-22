@@ -1,0 +1,41 @@
+---
+- name: Configure Kubernetes repositories
+  hosts: kubernetes
+  become: true
+
+  vars:
+    kubernetes_version: "v1.32"
+
+  tasks:
+
+    - name: Ensure DNF plugins are installed
+      dnf:
+        name: dnf-plugins-core
+        state: present
+
+    - name: Add Kubernetes repository
+      copy:
+        dest: /etc/yum.repos.d/kubernetes.repo
+        owner: root
+        group: root
+        mode: '0644'
+        content: |
+          [kubernetes]
+          name=Kubernetes
+          baseurl=https://pkgs.k8s.io/core:/stable:/{{ kubernetes_version }}/rpm/
+          enabled=1
+          gpgcheck=1
+          gpgkey=https://pkgs.k8s.io/core:/stable:/{{ kubernetes_version }}/rpm/repodata/repomd.xml.key
+
+    - name: Refresh package metadata
+      command: dnf makecache
+      changed_when: false
+
+    - name: Verify kubeadm package availability
+      command: dnf list kubeadm
+      register: kubeadm_check
+      changed_when: false
+
+    - name: Display kubeadm availability
+      debug:
+        var: kubeadm_check.stdout_lines
