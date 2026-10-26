@@ -1,0 +1,77 @@
+---
+- name: Install Kubernetes runtime and packages
+  hosts: kubernetes
+  become: true
+
+  tasks:
+
+    - name: Install containerd
+      dnf:
+        name: containerd.io
+        state: present
+
+    - name: Create containerd configuration directory
+      file:
+        path: /etc/containerd
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+    - name: Backup vendor supplied config
+      copy:
+        src: /etc/containerd/config.toml
+        dest: /etc/containerd/config.toml.bak
+        remote_src: true
+        force: false
+
+    - name: Generate Kubernetes-compatible config
+      shell: |
+        containerd config default > /etc/containerd/config.toml
+
+#    - name: Generate default containerd configuration
+#      shell: |
+#        containerd config default > /etc/containerd/config.toml
+#      args:
+#        creates: /etc/containerd/config.toml
+
+    - name: Configure containerd to use systemd cgroups
+      replace:
+        path: /etc/containerd/config.toml
+        regexp: 'SystemdCgroup = false'
+        replace: 'SystemdCgroup = true'
+
+    - name: Restart and enable containerd
+      systemd:
+        name: containerd
+        enabled: true
+        state: restarted
+
+    - name: Install Kubernetes packages
+      dnf:
+        name:
+          - kubeadm
+          - kubelet
+          - kubectl
+        state: present
+        disable_excludes: all
+
+    - name: Enable kubelet
+      systemd:
+        name: kubelet
+        enabled: true
+
+    - name: Verify containerd is active
+      command: systemctl is-active containerd
+      register: containerd_status
+      changed_when: false
+
+    - name: Verify kubeadm version
+      command: kubeadm version -o short
+      register: kubeadm_version
+      changed_when: false
+
+    - name: Show installed versions
+      debug:
+        msg:
+          - "containerd={{ containerd_status.stdout }}"
+          - "kubeadm={{ kubeadm_version.stdout }}"
