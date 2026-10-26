@@ -86,3 +86,34 @@ The environment is built incrementally using Ansible:
 8. Validate node readiness
 9. Initialise the cluster with kubeadm
 
+## Validation
+
+Examples of validation performed after deployment include:
+```
+ansible kubernetes -i inventory.yml -a "swapon --show"
+ansible kubernetes -i inventory.yml -a "sysctl net.ipv4.ip_forward"
+ansible kubernetes -i inventory.yml -a "systemctl status containerd"
+```
+
+## Learning Goals
+
+This repository documents my journey into:
+
+  -  Platform Engineering
+  -  Site Reliability Engineering (SRE)
+  -  Kubernetes Administration
+  -  Infrastructure Automation
+  -  Linux Systems Engineering
+
+## Future Enhancements
+
+  -  Cluster bootstrap automation
+  -  CNI deployment
+  -  GitOps with ArgoCD
+  -  Monitoring with Prometheus and Grafana
+  -  Certificate management
+  -  Storage provisioning
+  -  CI/CD validation pipelines
+
+## Disclaimer
+This is a personal homelab project used for learning, experimentation, and skills development. It is not intended to represent a production-ready deployment.
