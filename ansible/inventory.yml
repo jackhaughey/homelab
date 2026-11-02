@@ -1,20 +1,29 @@
 all:
   children:
 
-    admin:
-      hosts:
-        rhel-admin-01.lab.local:
+    infrastructure:
+      children:
 
-    storage:
-      hosts:
-        rhel-storage-01.lab.local:
+        admin:
+          hosts:
+            rhel-admin-01.lab.local:
 
-    ipa:
-      hosts:
-        ipa01.lab.local:
+        ipa:
+          hosts:
+            ipa01.lab.local:
+
+        storage:
+          hosts:
+            rhel-storage-01.lab.local:
 
     kubernetes:
-      hosts:
-        k8s-control-01.lab.local:
-        k8s-worker-01.lab.local:
-        k8s-worker-02.lab.local:
+      children:
+
+        k8s_control:
+          hosts:
+            k8s-controller-01.lab.local:
+
+        k8s_workers:
+          hosts:
+            k8s-worker-01.lab.local:
+            k8s-worker-02.lab.local:
