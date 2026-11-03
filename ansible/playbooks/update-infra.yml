@@ -10,6 +10,6 @@
         name: "*"
         state: latest
 
-    - name: Reboot if required
+    - name: Reboot after patching
       reboot:
         reboot_timeout: 600
