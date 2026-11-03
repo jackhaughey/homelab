@@ -1,0 +1,15 @@
+---
+- name: Update Kubernetes nodes
+  hosts: k8s_control
+  become: true
+
+  tasks:
+
+    - name: Upgrade all packages
+      dnf:
+        name: "*"
+        state: latest
+
+    - name: Reboot if required
+      reboot:
+        reboot_timeout: 600
