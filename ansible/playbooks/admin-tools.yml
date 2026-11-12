@@ -18,3 +18,25 @@
           - git
           - bash-completion
         state: present
+
+    - name: Download Helm installer
+      get_url:
+        url: https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+        dest: /tmp/get_helm.sh
+        mode: '0755'
+
+    - name: Install Helm
+      command: /tmp/get_helm.sh
+      args:
+        creates: /usr/local/bin/helm
+      environment:
+        PATH: "/usr/local/bin:/usr/bin:/bin"
+
+    - name: Verify Helm installation
+      command: /usr/local/bin/helm version --short
+      register: helm_version
+      changed_when: false
+
+    - name: Display Helm version
+      debug:
+        var: helm_version.stdout

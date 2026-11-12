@@ -1,0 +1,21 @@
+# kubernetes/storage/storage-test-pod.yml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: storage-test
+spec:
+  containers:
+  - name: storage-test
+    image: busybox
+    command: ["sleep", "3600"]
+
+    volumeMounts:
+    - name: storage
+      mountPath: /data
+
+  volumes:
+  - name: storage
+    persistentVolumeClaim:
+      claimName: test-pvc
+

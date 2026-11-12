@@ -1,3 +1,10 @@
+---
+- name: Configure Kubernetes prerequisites
+  hosts: kubernetes
+  become: true
+
+  tasks:
+
     - name: Disable swap immediately
       command: swapoff -a
       when: ansible_swaptotal_mb > 0
@@ -51,3 +58,31 @@
           - jq
           - bash-completion
         state: present
+
+    - name: Open kubelet API port
+      firewalld:
+        port: 10250/tcp
+        permanent: true
+        state: enabled
+        immediate: true
+
+    - name: Open kube-proxy port
+      firewalld:
+        port: 10256/tcp
+        permanent: true
+        state: enabled
+        immediate: true
+
+    - name: Open NodePort TCP ports
+      firewalld:
+        port: 30000-32767/tcp
+        permanent: true
+        state: enabled
+        immediate: true
+
+    - name: Open NodePort UDP ports
+      firewalld:
+        port: 30000-32767/udp
+        permanent: true
+        state: enabled
+        immediate: true
