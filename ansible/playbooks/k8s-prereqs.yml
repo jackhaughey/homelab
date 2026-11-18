@@ -86,3 +86,23 @@
         permanent: true
         state: enabled
         immediate: true
+
+    - name: Open Cilium VXLAN port
+      ansible.posix.firewalld:
+        port: 8472/udp
+        permanent: true
+        state: enabled
+        immediate: true
+    - name: Open Cilium health TCP port
+      ansible.posix.firewalld:
+        port: 4240/tcp
+        permanent: true
+        state: enabled
+        immediate: true
+
+    - name: Open Cilium health UDP port
+      ansible.posix.firewalld:
+        port: 4240/udp
+        permanent: true
+        state: enabled
+        immediate: true
